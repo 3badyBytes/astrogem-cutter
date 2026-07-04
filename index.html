@@ -25,24 +25,24 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background: radial-gradient(1200px 600px at 50% -10%, #1A2140 0%, var(--void) 55%);
+    background: radial-gradient(1400px 700px at 50% -10%, #1A2140 0%, var(--void) 55%);
     color: var(--ink);
     font-family: 'Inter', system-ui, sans-serif;
   }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 26px 18px 90px; }
-  .title { font-family: 'Cinzel', serif; text-align: center; font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; }
-  .subtitle { text-align: center; color: var(--dim); font-size: 13px; margin-top: 6px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 26px 20px 90px; }
+  .title { font-family: 'Cinzel', serif; text-align: center; font-size: 28px; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; }
+  .subtitle { text-align: center; color: var(--dim); font-size: 13px; margin-top: 6px; margin-bottom: 20px; }
   .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
   .label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
   .row { display: flex; gap: 10px; }
+  .setupCol { max-width: 560px; margin: 0 auto; }
   .gembtn {
     flex: 1; padding: 14px 8px; border-radius: 12px; border: 1.5px solid var(--edge);
     background: transparent; color: var(--dim); font-family: 'Cinzel', serif; font-size: 13px;
     font-weight: 700; letter-spacing: 0.05em; cursor: pointer; transition: all .15s;
   }
-  .gembtn.active { }
   .dot { width: 22px; height: 22px; margin: 0 auto 8px; transform: rotate(45deg); border-radius: 6px; transition: box-shadow .2s; }
-  .subrow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #232B4A44; }
+  .subrow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #232B4A44; gap: 10px; flex-wrap: wrap; }
   .tag { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; }
   .name { font-size: 14px; }
   .weightbtn { padding: 6px 9px; border-radius: 8px; font-size: 11px; border: 1px solid var(--edge); background: transparent; color: var(--dim); cursor: pointer; margin-left: 5px; }
@@ -57,14 +57,41 @@
     width: 100%; padding: 13px; border-radius: 12px; background: transparent; border: 1px solid var(--gold);
     color: var(--gold); font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; cursor: pointer;
   }
-  video { width: 100%; border-radius: 10px; display: block; background: #000; }
+  .toggleRow { display: flex; gap: 8px; }
+  .togglebtn { flex: 1; padding: 9px 6px; border-radius: 9px; font-size: 12px; border: 1px solid var(--edge); background: transparent; color: var(--dim); cursor: pointer; }
+  .togglebtn.active { border-color: var(--blue); background: rgba(78,143,232,0.13); color: var(--blue); }
+
+  /* Play phase — two column */
+  .playGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 880px) { .playGrid { grid-template-columns: 1fr; } }
+
   .statusbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
   .statleft { display: flex; align-items: center; gap: 10px; }
-  .watchdot { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
+  .watchdot { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); flex-shrink:0; }
   .watchdot.live { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.6s infinite; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-  .verdict { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 700; text-align: center; margin: 4px 0 2px; }
+
+  .videoWrap { position: relative; border-radius: 10px; overflow: hidden; background:#000; }
+  video { width: 100%; display: block; }
+  .cropOverlay { position:absolute; inset:0; cursor: crosshair; touch-action:none; }
+  .cropRect { position:absolute; border: 2px solid var(--gold); background: rgba(212,169,78,0.15); pointer-events:none; }
+  .cropBadge { position:absolute; top:8px; left:8px; background: rgba(11,14,26,0.85); border:1px solid var(--edge); border-radius:8px; padding:4px 8px; font-size:11px; color:var(--dim); }
+
+  .gemStage { display:flex; flex-direction:column; align-items:center; padding: 22px 16px; }
+  .nodeGrid { display:grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, auto); gap: 4px; width: 210px; margin-top: 14px; align-items:center; justify-items:center; }
+  .nodeCell { font-size: 11px; text-align:center; color: var(--dim); }
+  .nodeCell b { display:block; font-size: 15px; color: var(--ink); }
+  .nodeBarTrack { width: 44px; height: 5px; border-radius:3px; background: #ffffff14; margin: 4px auto 0; overflow:hidden; }
+  .nodeBarFill { height: 100%; border-radius:3px; }
+
+  .verdict { font-family: 'Cinzel', serif; font-size: 25px; font-weight: 700; text-align: center; margin: 4px 0 2px; }
   .conf { text-align: center; font-size: 11px; color: var(--dim); margin-bottom: 14px; }
+  .evbars { display:flex; flex-direction:column; gap:7px; margin: 12px 0; }
+  .evrow { display:flex; align-items:center; gap:8px; font-size:11px; }
+  .evlabel { width: 62px; color: var(--dim); flex-shrink:0; }
+  .evtrack { flex:1; height:8px; border-radius:5px; background:#ffffff10; overflow:hidden; }
+  .evfill { height:100%; border-radius:5px; transition: width .3s; }
+  .evpct { width: 34px; text-align:right; color: var(--dim); flex-shrink:0; }
   .lastresult { font-size: 12px; color: var(--dim); background: var(--void); border: 1px solid var(--edge); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
   .reasoning { font-size: 13px; line-height: 1.55; color: var(--ink); }
   .hidden { display: none !important; }
@@ -75,18 +102,19 @@
     width: 44px; background: var(--void); border: 1px solid var(--edge); border-radius: 6px; color: var(--ink); padding: 4px 6px; margin-left: 4px;
   }
   .errbox { border-color: var(--red) !important; color: var(--red); font-size: 13px; }
-  .toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dim); }
   button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  .spin { animation: spin 1s linear infinite; transform-origin: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div id="setupPhase">
-    <div class="title">ASTROGEM CUTTER</div>
-    <div class="subtitle">Share your screen. It watches for taps and tells you what to do.</div>
+  <div class="title">ASTROGEM CUTTER</div>
+  <div class="subtitle" id="subtitleText">Share your screen. It watches for taps and tells you what to do.</div>
 
+  <div id="setupPhase" class="setupCol">
     <div class="panel">
       <div class="label">Gem grade</div>
       <div class="row" id="gradeRow"></div>
@@ -95,8 +123,23 @@
     <div class="panel">
       <div class="label">What matters on this gem</div>
       <div id="prioList"></div>
-      <div style="font-size:11px;color:var(--dim);margin-top:10px;">
-        Red + Yellow at max is the standard meta play. Side options only if you're chasing a specific stat.
+    </div>
+
+    <div class="panel">
+      <div class="label">Tickets you have in your bag</div>
+      <div class="subrow">
+        <div class="name">Reroll Ticket (Blue Crystals)</div>
+        <div class="toggleRow" style="width:140px;">
+          <button class="togglebtn active" id="rerollTicketYes">Have it</button>
+          <button class="togglebtn" id="rerollTicketNo">None</button>
+        </div>
+      </div>
+      <div class="subrow" style="border-bottom:none;">
+        <div class="name">Processing Reset Ticket</div>
+        <div class="toggleRow" style="width:140px;">
+          <button class="togglebtn" id="resetTicketYes">Have it</button>
+          <button class="togglebtn active" id="resetTicketNo">None</button>
+        </div>
       </div>
     </div>
 
@@ -118,40 +161,83 @@
       </div>
     </div>
 
-    <div class="panel">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div class="watchdot" id="watchDot"></div>
-        <span id="watchLabel" style="font-size:13px;">Not sharing yet</span>
+    <div class="playGrid">
+      <!-- LEFT: capture -->
+      <div>
+        <div class="panel">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div class="watchdot" id="watchDot"></div>
+            <span id="watchLabel" style="font-size:13px;">Not sharing yet</span>
+          </div>
+          <div class="videoWrap" id="videoWrap">
+            <video id="preview" autoplay muted></video>
+            <div class="cropOverlay hidden" id="cropOverlay"></div>
+            <div class="cropRect hidden" id="cropRect"></div>
+            <div class="cropBadge hidden" id="cropBadge">custom area set</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;">
+            <button class="primary" id="shareBtn" style="flex:1;">SHARE SCREEN</button>
+            <button class="ghost" id="cropBtn" style="flex:1;" disabled>SET CAPTURE AREA</button>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-top:10px;">
+            <input type="checkbox" id="autoWatch" checked style="accent-color:var(--gold);">
+            Auto-watch for taps
+          </label>
+        </div>
+
+        <button class="primary" id="readBtn" disabled>READ NOW</button>
+
+        <div class="panel errbox hidden" id="errBox"></div>
+
+        <div class="panel">
+          <div class="label">Tracker (auto-syncs — fix if wrong)</div>
+          <div class="trackrow">
+            <label>Taps left <input id="attemptsIn" inputmode="numeric"></label>
+            <label>Rerolls <input id="rerollsIn" inputmode="numeric"></label>
+          </div>
+          <button class="smalllink" id="newGemBtn">Start a new gem</button>
+        </div>
       </div>
-      <video id="preview" autoplay muted></video>
-      <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="primary" id="shareBtn" style="flex:1;">SHARE SCREEN</button>
-        <label class="toggle" style="flex:1;justify-content:center;border:1px solid var(--edge);border-radius:12px;padding:0 10px;">
-          <input type="checkbox" id="autoWatch" checked style="accent-color:var(--gold);">
-          Auto-watch for taps
-        </label>
+
+      <!-- RIGHT: gem + verdict -->
+      <div>
+        <div class="panel gemStage">
+          <svg id="gemSvg" width="120" height="120" viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop id="gemGradA" offset="0%" stop-color="#4CC96B"/>
+                <stop id="gemGradB" offset="100%" stop-color="#4CC96B55"/>
+              </linearGradient>
+              <filter id="gemGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <g id="gemGlowGroup" filter="url(#gemGlow)">
+              <polygon points="60,10 100,45 82,110 38,110 20,45" fill="url(#gemGrad)" stroke="#ffffff55" stroke-width="1.5"/>
+              <polygon points="60,10 100,45 60,60" fill="#ffffff22"/>
+              <polygon points="60,10 20,45 60,60" fill="#ffffff11"/>
+            </g>
+          </svg>
+          <div class="nodeGrid">
+            <div></div>
+            <div class="nodeCell" id="cellTop"><span>—</span><b>1</b><div class="nodeBarTrack"><div class="nodeBarFill" id="barTop" style="width:20%;background:var(--red);"></div></div></div>
+            <div></div>
+            <div class="nodeCell" id="cellLeft"><span>—</span><b>1</b><div class="nodeBarTrack"><div class="nodeBarFill" id="barLeft" style="width:20%;background:var(--green);"></div></div></div>
+            <div style="font-size:9px;color:var(--dim);">points</div>
+            <div class="nodeCell" id="cellRight"><span>—</span><b>1</b><div class="nodeBarTrack"><div class="nodeBarFill" id="barRight" style="width:20%;background:var(--blue);"></div></div></div>
+            <div></div>
+            <div class="nodeCell" id="cellBottom"><span>—</span><b>1</b><div class="nodeBarTrack"><div class="nodeBarFill" id="barBottom" style="width:20%;background:var(--yellow);"></div></div></div>
+            <div></div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="resultPanel">
+          <div class="verdict" id="verdictText"></div>
+          <div class="conf" id="confText"></div>
+          <div class="evbars" id="evBars"></div>
+          <div class="lastresult hidden" id="lastResultBox"></div>
+          <div class="reasoning" id="reasoningText"></div>
+          <button class="ghost" id="ackBtn" style="margin-top:14px;">I MADE MY MOVE — WATCH AGAIN</button>
+        </div>
       </div>
-    </div>
-
-    <button class="primary" id="readBtn" disabled>READ NOW</button>
-
-    <div class="panel errbox hidden" id="errBox"></div>
-
-    <div class="panel hidden" id="resultPanel">
-      <div class="verdict" id="verdictText"></div>
-      <div class="conf" id="confText"></div>
-      <div class="lastresult hidden" id="lastResultBox"></div>
-      <div class="reasoning" id="reasoningText"></div>
-      <button class="ghost" id="ackBtn" style="margin-top:14px;">I MADE MY MOVE — WATCH AGAIN</button>
-    </div>
-
-    <div class="panel">
-      <div class="label">Tracker (auto-syncs — fix if wrong)</div>
-      <div class="trackrow">
-        <label>Taps left <input id="attemptsIn" inputmode="numeric"></label>
-        <label>Rerolls <input id="rerollsIn" inputmode="numeric"></label>
-      </div>
-      <button class="smalllink" id="newGemBtn">Start a new gem</button>
     </div>
   </div>
 
@@ -167,10 +253,10 @@ const GRADES = {
   purple: { label:'Purple (Epic)',    color:T.purple, rerolls:2 },
 };
 const NODE_DEFS = [
-  { key:'top',    label:'Willpower Efficiency', hint:'always shown top, red',    tag:'TOP',    color:T.red },
-  { key:'bottom', label:'Points node',          hint:'Core/Chaos Points, orange',tag:'BOTTOM', color:T.yellow },
-  { key:'left',   label:'Side node (left)',     hint:'varies by gem type',       tag:'LEFT',   color:T.green },
-  { key:'right',  label:'Side node (right)',    hint:'varies by gem type',       tag:'RIGHT',  color:T.blue },
+  { key:'top',    label:'Willpower Efficiency', hint:'always top, red',           tag:'TOP',    color:T.red },
+  { key:'bottom', label:'Points node',          hint:'Core/Chaos Points, orange', tag:'BOTTOM', color:T.yellow },
+  { key:'left',   label:'Side node (left)',     hint:'varies by gem type',        tag:'LEFT',   color:T.green },
+  { key:'right',  label:'Side node (right)',    hint:'varies by gem type',        tag:'RIGHT',  color:T.blue },
 ];
 
 let state = {
@@ -178,14 +264,16 @@ let state = {
   priorities: { top:3, bottom:3, left:1, right:1 },
   nodes: { top:{name:null,level:1}, bottom:{name:null,level:1}, left:{name:null,level:1}, right:{name:null,level:1} },
   attempts: '',
-  attemptsTotal: '',
   rerolls: 0,
+  rerollTicket: true,
+  resetTicket: false,
   stream: null,
   watching: false,
   paused: false,
   busy: false,
   lastFrameHash: null,
   pollTimer: null,
+  crop: null, // {x,y,w,h} fractions 0..1 of native video size
 };
 
 // ---------- Setup phase build ----------
@@ -228,9 +316,18 @@ NODE_DEFS.forEach(d => {
   prioList.appendChild(row);
 });
 
+function wireToggle(yesId, noId, setter) {
+  const yes = document.getElementById(yesId), no = document.getElementById(noId);
+  yes.onclick = () => { setter(true); yes.classList.add('active'); no.classList.remove('active'); };
+  no.onclick = () => { setter(false); no.classList.add('active'); yes.classList.remove('active'); };
+}
+wireToggle('rerollTicketYes','rerollTicketNo', v => state.rerollTicket = v);
+wireToggle('resetTicketYes','resetTicketNo', v => state.resetTicket = v);
+
 document.getElementById('startBtn').onclick = () => {
   document.getElementById('setupPhase').classList.add('hidden');
   document.getElementById('playPhase').classList.remove('hidden');
+  document.getElementById('subtitleText').textContent = "It holds its verdict until you act — no endless chatter.";
   const g = GRADES[state.grade];
   document.getElementById('gemDot').style.background = `linear-gradient(135deg, ${g.color}, ${g.color}55)`;
   document.getElementById('gemDot').style.transform = 'rotate(45deg)';
@@ -241,6 +338,8 @@ document.getElementById('startBtn').onclick = () => {
   document.getElementById('gemLabel').style.color = g.color;
   document.getElementById('rerollsOut').textContent = state.rerolls;
   document.getElementById('rerollsIn').value = state.rerolls;
+  document.getElementById('gemGradA').setAttribute('stop-color', g.color);
+  document.getElementById('gemGradB').setAttribute('stop-color', g.color + '55');
   updateNodeSummary();
   requestShare();
 };
@@ -250,6 +349,17 @@ function updateNodeSummary() {
     const n = state.nodes[d.key];
     return (n.name ? n.name.slice(0,3) : d.tag.slice(0,3)) + ' ' + n.level;
   }).join(' · ');
+  NODE_DEFS.forEach(d => {
+    const n = state.nodes[d.key];
+    const cellKey = d.key.charAt(0).toUpperCase() + d.key.slice(1);
+    const cell = document.getElementById('cell' + cellKey);
+    if (cell) {
+      cell.querySelector('span').textContent = n.name ? n.name.slice(0,10) : d.tag;
+      cell.querySelector('b').textContent = n.level;
+    }
+    const bar = document.getElementById('bar' + cellKey);
+    if (bar) bar.style.width = (n.level/5*100) + '%';
+  });
 }
 
 // ---------- Screen share ----------
@@ -264,6 +374,7 @@ async function requestShare() {
     document.getElementById('watchDot').classList.add('live');
     document.getElementById('watchLabel').textContent = 'Sharing — watching for taps';
     document.getElementById('readBtn').disabled = false;
+    document.getElementById('cropBtn').disabled = false;
     document.getElementById('shareBtn').textContent = 'STOP SHARING';
     state.watching = true;
     stream.getVideoTracks()[0].addEventListener('ended', stopShare);
@@ -280,6 +391,7 @@ function stopShare() {
   document.getElementById('watchDot').classList.remove('live');
   document.getElementById('watchLabel').textContent = 'Not sharing yet';
   document.getElementById('readBtn').disabled = true;
+  document.getElementById('cropBtn').disabled = true;
   document.getElementById('shareBtn').textContent = 'SHARE SCREEN';
 }
 
@@ -292,13 +404,82 @@ document.getElementById('autoWatch').onchange = (e) => {
   else if (state.pollTimer) clearInterval(state.pollTimer);
 };
 
-// cheap perceptual hash: downsample to 16x16 grayscale, sum
+// ---------- Crop selection ----------
+const cropOverlay = document.getElementById('cropOverlay');
+const cropRectEl = document.getElementById('cropRect');
+const cropBadge = document.getElementById('cropBadge');
+let cropping = false, cropStart = null;
+
+document.getElementById('cropBtn').onclick = () => {
+  if (state.crop) {
+    // clear crop
+    state.crop = null;
+    cropBadge.classList.add('hidden');
+    cropRectEl.classList.add('hidden');
+    document.getElementById('cropBtn').textContent = 'SET CAPTURE AREA';
+    return;
+  }
+  cropOverlay.classList.remove('hidden');
+  document.getElementById('cropBtn').textContent = 'DRAG ON VIDEO ABOVE…';
+};
+
+function pt(e) {
+  const rect = video.getBoundingClientRect();
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  return { x: Math.max(0, Math.min(rect.width, cx)), y: Math.max(0, Math.min(rect.height, cy)), rect };
+}
+
+function cropDown(e) {
+  cropping = true;
+  cropStart = pt(e);
+  cropRectEl.classList.remove('hidden');
+}
+function cropMove(e) {
+  if (!cropping) return;
+  const p = pt(e);
+  const x = Math.min(cropStart.x, p.x), y = Math.min(cropStart.y, p.y);
+  const w = Math.abs(p.x - cropStart.x), h = Math.abs(p.y - cropStart.y);
+  cropRectEl.style.left = x + 'px'; cropRectEl.style.top = y + 'px';
+  cropRectEl.style.width = w + 'px'; cropRectEl.style.height = h + 'px';
+}
+function cropUp(e) {
+  if (!cropping) return;
+  cropping = false;
+  const p = pt(e);
+  const rect = p.rect;
+  const x0 = Math.min(cropStart.x, p.x), y0 = Math.min(cropStart.y, p.y);
+  const w = Math.abs(p.x - cropStart.x), h = Math.abs(p.y - cropStart.y);
+  if (w < 20 || h < 20) { cropOverlay.classList.add('hidden'); document.getElementById('cropBtn').textContent = 'SET CAPTURE AREA'; return; }
+  state.crop = { x: x0/rect.width, y: y0/rect.height, w: w/rect.width, h: h/rect.height };
+  cropOverlay.classList.add('hidden');
+  cropBadge.classList.remove('hidden');
+  document.getElementById('cropBtn').textContent = 'CLEAR CAPTURE AREA';
+  state.lastFrameHash = null;
+}
+cropOverlay.addEventListener('mousedown', cropDown);
+cropOverlay.addEventListener('mousemove', cropMove);
+window.addEventListener('mouseup', cropUp);
+cropOverlay.addEventListener('touchstart', cropDown);
+cropOverlay.addEventListener('touchmove', cropMove);
+cropOverlay.addEventListener('touchend', cropUp);
+
+// ---------- Frame capture ----------
 function grabFrame() {
   if (!video.videoWidth) return null;
-  cvs.width = video.videoWidth;
-  cvs.height = video.videoHeight;
+  const vw = video.videoWidth, vh = video.videoHeight;
+  let sx=0, sy=0, sw=vw, sh=vh;
+  if (state.crop) {
+    sx = Math.round(state.crop.x * vw); sy = Math.round(state.crop.y * vh);
+    sw = Math.round(state.crop.w * vw); sh = Math.round(state.crop.h * vh);
+  }
+  // cap max dimension for speed
+  const maxDim = 1000;
+  let outW = sw, outH = sh;
+  if (outW > maxDim) { const s = maxDim/outW; outW = maxDim; outH = Math.round(outH*s); }
+  cvs.width = outW; cvs.height = outH;
   const ctx = cvs.getContext('2d');
-  ctx.drawImage(video, 0, 0, cvs.width, cvs.height);
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
   return ctx;
 }
 
@@ -318,17 +499,16 @@ function quickHash() {
 function startPolling() {
   if (state.pollTimer) clearInterval(state.pollTimer);
   state.pollTimer = setInterval(() => {
-    if (state.busy || !state.watching) return;
-    if (state.paused) return; // verdict shown — wait for the user to make their move
+    if (state.busy || !state.watching || state.paused) return;
     const h = quickHash();
     if (h === null) return;
     if (state.lastFrameHash !== null && h !== state.lastFrameHash) {
       state.lastFrameHash = h;
-      setTimeout(() => { if (!state.busy && !state.paused) analyze(); }, 400);
+      setTimeout(() => { if (!state.busy && !state.paused) analyze(); }, 350);
     } else {
       state.lastFrameHash = h;
     }
-  }, 800);
+  }, 700);
 }
 
 // ---------- Analyze ----------
@@ -345,16 +525,7 @@ async function analyze() {
   document.getElementById('readBtn').disabled = true;
   document.getElementById('readBtn').textContent = 'READING…';
 
-  // Downscale to max 1600px wide — big speed win, still sharp enough to read the UI
-  let sendCvs = cvs;
-  if (cvs.width > 1600) {
-    sendCvs = document.createElement('canvas');
-    const scale = 1600 / cvs.width;
-    sendCvs.width = 1600;
-    sendCvs.height = Math.round(cvs.height * scale);
-    sendCvs.getContext('2d').drawImage(cvs, 0, 0, sendCvs.width, sendCvs.height);
-  }
-  const b64 = sendCvs.toDataURL('image/jpeg', 0.8).split(',')[1];
+  const b64 = cvs.toDataURL('image/jpeg', 0.75).split(',')[1];
   const payload = {
     gemGrade: state.grade,
     priorities: Object.fromEntries(NODE_DEFS.map(d => [d.key, state.priorities[d.key]])),
@@ -363,18 +534,15 @@ async function analyze() {
     trackedNodes: state.nodes,
     trackedAttemptsLeft: state.attempts === '' ? null : Number(state.attempts),
     trackedRerollsLeft: state.rerolls,
+    rerollTicketAvailable: state.rerollTicket,
+    resetTicketAvailable: state.resetTicket,
   };
 
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image: b64,
-        mediaType: 'image/jpeg',
-        mode: 'fast',
-        state: payload,
-      }),
+      body: JSON.stringify({ image: b64, mediaType: 'image/jpeg', mode: 'fast', state: payload }),
     });
     const parsed = await res.json();
     if (!res.ok || parsed.error) {
@@ -383,17 +551,21 @@ async function analyze() {
       renderResult(parsed);
     }
   } catch (e) {
-    showError("Couldn't reach the server. Make sure the site is deployed with ANTHROPIC_API_KEY set, then try Read Now.");
+    showError("Couldn't reach the server. Try Read Now again.");
   }
   state.busy = false;
   document.getElementById('readBtn').disabled = !state.watching;
   document.getElementById('readBtn').textContent = 'READ NOW';
 }
 
+const EV_COLORS = { process: 'var(--green)', reroll: 'var(--blue)', reset: 'var(--purple)', stop: 'var(--red)' };
+const EV_LABELS = { process: 'Process', reroll: 'Reroll', reset: 'Reset', stop: 'Stop' };
+
 function renderResult(parsed) {
   const rd = parsed.read || {};
-  const isVerdict = parsed.onScreen !== false && ['PROCESS','REROLL','STOP'].includes(parsed.decision);
-  state.paused = isVerdict; // hold on real verdicts until the user acts; keep watching on WAIT
+  const isVerdict = parsed.onScreen !== false && ['PROCESS','REROLL','RESET','STOP'].includes(parsed.decision);
+  state.paused = isVerdict;
+
   if (rd.attemptsLeft != null) { state.attempts = String(rd.attemptsLeft); document.getElementById('attemptsIn').value = state.attempts; document.getElementById('attemptsOut').textContent = state.attempts; }
   if (rd.rerollsLeft != null) { state.rerolls = rd.rerollsLeft; document.getElementById('rerollsIn').value = state.rerolls; document.getElementById('rerollsOut').textContent = state.rerolls; }
   if (rd.nodes) {
@@ -407,30 +579,47 @@ function renderResult(parsed) {
     updateNodeSummary();
   }
 
-  if (parsed.onScreen === false || parsed.decision === 'WAIT') {
-    document.getElementById('resultPanel').classList.remove('hidden');
-    document.getElementById('resultPanel').style.borderColor = 'var(--edge)';
+  const panel = document.getElementById('resultPanel');
+  panel.classList.remove('hidden');
+
+  if (!isVerdict) {
+    panel.style.borderColor = 'var(--edge)';
     document.getElementById('verdictText').textContent = "WAITING FOR THE GEM SCREEN";
     document.getElementById('verdictText').style.color = 'var(--dim)';
     document.getElementById('confText').textContent = '';
+    document.getElementById('evBars').innerHTML = '';
     document.getElementById('lastResultBox').classList.add('hidden');
     document.getElementById('reasoningText').textContent = parsed.reasoning || "I can't see the Astrogem processing screen right now — pull it up and hit Read Now.";
     return;
   }
 
-  const colorMap = { PROCESS: 'var(--green)', REROLL: 'var(--blue)', STOP: 'var(--red)' };
-  const labelMap = { PROCESS: 'PROCESS — TAKE THE ROLL', REROLL: 'REROLL THE PREVIEW', STOP: 'STOP — PROCESSING COMPLETE' };
-  const panel = document.getElementById('resultPanel');
-  panel.classList.remove('hidden');
+  const colorMap = { PROCESS: 'var(--green)', REROLL: 'var(--blue)', RESET: 'var(--purple)', STOP: 'var(--red)' };
+  const labelMap = {
+    PROCESS: 'PROCESS — TAKE THE ROLL',
+    REROLL: parsed.usingTicket ? 'REROLL — USE TICKET' : 'REROLL THE PREVIEW',
+    RESET: 'RESET — USE TICKET',
+    STOP: 'STOP — PROCESSING COMPLETE',
+  };
   panel.style.borderColor = colorMap[parsed.decision] || 'var(--edge)';
   const verdict = document.getElementById('verdictText');
   verdict.textContent = labelMap[parsed.decision] || parsed.decision;
   verdict.style.color = colorMap[parsed.decision] || 'var(--ink)';
   document.getElementById('confText').textContent = 'confidence: ' + (parsed.confidence || '—') + (parsed.progress ? ' · ' + parsed.progress : '');
+
+  const evBars = document.getElementById('evBars');
+  evBars.innerHTML = '';
+  const ev = parsed.evBreakdown || {};
+  ['process','reroll','reset','stop'].forEach(k => {
+    const pct = ev[k] != null ? ev[k] : 0;
+    const row = document.createElement('div');
+    row.className = 'evrow';
+    row.innerHTML = `<div class="evlabel">${EV_LABELS[k]}</div><div class="evtrack"><div class="evfill" style="width:${pct}%;background:${EV_COLORS[k]};"></div></div><div class="evpct">${Math.round(pct)}%</div>`;
+    evBars.appendChild(row);
+  });
+
   if (rd.previewOutcomes && rd.previewOutcomes.length) {
     document.getElementById('lastResultBox').classList.remove('hidden');
-    document.getElementById('lastResultBox').innerHTML = '<b>Previewed outcomes:</b><br>' +
-      rd.previewOutcomes.map(o => '• ' + o.desc).join('<br>');
+    document.getElementById('lastResultBox').innerHTML = '<b>Previewed outcomes:</b><br>' + rd.previewOutcomes.map(o => '• ' + o.desc).join('<br>');
   } else {
     document.getElementById('lastResultBox').classList.add('hidden');
   }
@@ -444,7 +633,7 @@ function hideError() { document.getElementById('errBox').classList.add('hidden')
 document.getElementById('ackBtn').onclick = () => {
   hideResult();
   state.paused = false;
-  state.lastFrameHash = quickHash(); // baseline = current screen; next change = your move
+  state.lastFrameHash = quickHash();
 };
 
 document.getElementById('attemptsIn').oninput = (e) => {
@@ -462,6 +651,7 @@ document.getElementById('newGemBtn').onclick = () => {
   stopShare();
   state.nodes = { top:{name:null,level:1}, bottom:{name:null,level:1}, left:{name:null,level:1}, right:{name:null,level:1} };
   state.attempts = '';
+  state.crop = null;
   document.getElementById('attemptsIn').value = '';
   document.getElementById('attemptsOut').textContent = '?';
   hideResult();
