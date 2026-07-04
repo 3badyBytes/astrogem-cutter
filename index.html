@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrogem Cutter — Live Watch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --void: #0B0E1A;
+    --panel: #12172B;
+    --edge: #232B4A;
+    --ink: #E8E4D8;
+    --dim: #8B8FA8;
+    --gold: #D4A94E;
+    --goldSoft: #8A6D2F;
+    --green: #4CC96B;
+    --blue: #4E8FE8;
+    --purple: #A05CE8;
+    --red: #E85C5C;
+    --yellow: #E8C84E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 50% -10%, #1A2140 0%, var(--void) 55%);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 26px 18px 90px; }
+  .title { font-family: 'Cinzel', serif; text-align: center; font-size: 26px; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; }
+  .subtitle { text-align: center; color: var(--dim); font-size: 13px; margin-top: 6px; }
+  .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+  .row { display: flex; gap: 10px; }
+  .gembtn {
+    flex: 1; padding: 14px 8px; border-radius: 12px; border: 1.5px solid var(--edge);
+    background: transparent; color: var(--dim); font-family: 'Cinzel', serif; font-size: 13px;
+    font-weight: 700; letter-spacing: 0.05em; cursor: pointer; transition: all .15s;
+  }
+  .gembtn.active { }
+  .dot { width: 22px; height: 22px; margin: 0 auto 8px; transform: rotate(45deg); border-radius: 6px; transition: box-shadow .2s; }
+  .subrow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #232B4A44; }
+  .tag { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; }
+  .name { font-size: 14px; }
+  .weightbtn { padding: 6px 9px; border-radius: 8px; font-size: 11px; border: 1px solid var(--edge); background: transparent; color: var(--dim); cursor: pointer; margin-left: 5px; }
+  .weightbtn.active { border-color: var(--gold); background: rgba(212,169,78,0.13); color: var(--gold); }
+  .primary {
+    width: 100%; padding: 15px; border-radius: 12px; border: none;
+    background: linear-gradient(180deg, var(--gold), var(--goldSoft)); color: #1A1408;
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer;
+  }
+  .primary:disabled { opacity: 0.4; cursor: default; }
+  .ghost {
+    width: 100%; padding: 13px; border-radius: 12px; background: transparent; border: 1px solid var(--gold);
+    color: var(--gold); font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; cursor: pointer;
+  }
+  video { width: 100%; border-radius: 10px; display: block; background: #000; }
+  .statusbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+  .statleft { display: flex; align-items: center; gap: 10px; }
+  .watchdot { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
+  .watchdot.live { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .verdict { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 700; text-align: center; margin: 4px 0 2px; }
+  .conf { text-align: center; font-size: 11px; color: var(--dim); margin-bottom: 14px; }
+  .lastresult { font-size: 12px; color: var(--dim); background: var(--void); border: 1px solid var(--edge); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+  .reasoning { font-size: 13px; line-height: 1.55; color: var(--ink); }
+  .hidden { display: none !important; }
+  .smalllink { background: none; border: none; color: var(--dim); font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 12px; padding: 0; }
+  .trackrow { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; }
+  .trackrow label { color: var(--dim); }
+  .trackrow input {
+    width: 44px; background: var(--void); border: 1px solid var(--edge); border-radius: 6px; color: var(--ink); padding: 4px 6px; margin-left: 4px;
+  }
+  .errbox { border-color: var(--red) !important; color: var(--red); font-size: 13px; }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dim); }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="setupPhase">
+    <div class="title">ASTROGEM CUTTER</div>
+    <div class="subtitle">Share your screen. It watches for taps and tells you what to do.</div>
+
+    <div class="panel">
+      <div class="label">Gem grade</div>
+      <div class="row" id="gradeRow"></div>
+    </div>
+
+    <div class="panel">
+      <div class="label">What matters on this gem</div>
+      <div id="prioList"></div>
+      <div style="font-size:11px;color:var(--dim);margin-top:10px;">
+        Red + Yellow at max is the standard meta play. Side options only if you're chasing a specific stat.
+      </div>
+    </div>
+
+    <button class="primary" id="startBtn" disabled>START & SHARE SCREEN</button>
+  </div>
+
+  <div id="playPhase" class="hidden">
+    <div class="panel statusbar">
+      <div class="statleft">
+        <div class="dot" id="gemDot"></div>
+        <div>
+          <div id="gemLabel" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;"></div>
+          <div id="nodeSummary" style="font-size:11px;color:var(--dim);"></div>
+        </div>
+      </div>
+      <div style="text-align:right;font-size:12px;">
+        <div><span style="color:var(--dim);">Taps left </span><b id="attemptsOut" style="color:var(--gold);">?</b></div>
+        <div><span style="color:var(--dim);">Rerolls </span><b id="rerollsOut" style="color:var(--blue);">0</b></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="watchdot" id="watchDot"></div>
+        <span id="watchLabel" style="font-size:13px;">Not sharing yet</span>
+      </div>
+      <video id="preview" autoplay muted></video>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="primary" id="shareBtn" style="flex:1;">SHARE SCREEN</button>
+        <label class="toggle" style="flex:1;justify-content:center;border:1px solid var(--edge);border-radius:12px;padding:0 10px;">
+          <input type="checkbox" id="autoWatch" checked style="accent-color:var(--gold);">
+          Auto-watch for taps
+        </label>
+      </div>
+    </div>
+
+    <button class="primary" id="readBtn" disabled>READ NOW</button>
+
+    <div class="panel errbox hidden" id="errBox"></div>
+
+    <div class="panel hidden" id="resultPanel">
+      <div class="verdict" id="verdictText"></div>
+      <div class="conf" id="confText"></div>
+      <div class="lastresult hidden" id="lastResultBox"></div>
+      <div class="reasoning" id="reasoningText"></div>
+      <button class="ghost" id="ackBtn" style="margin-top:14px;">GOT IT — KEEP WATCHING</button>
+    </div>
+
+    <div class="panel">
+      <div class="label">Tracker (auto-syncs — fix if wrong)</div>
+      <div class="trackrow">
+        <label>Taps left <input id="attemptsIn" inputmode="numeric"></label>
+        <label>Rerolls <input id="rerollsIn" inputmode="numeric"></label>
+      </div>
+      <button class="smalllink" id="newGemBtn">Start a new gem</button>
+    </div>
+  </div>
+
+</div>
+
+<canvas id="cvs" class="hidden"></canvas>
+
+<script>
+const T = { green:'#4CC96B', blue:'#4E8FE8', purple:'#A05CE8', red:'#E85C5C', yellow:'#E8C84E' };
+const GRADES = {
+  green:  { label:'Green (Uncommon)', color:T.green, rerolls:0 },
+  blue:   { label:'Blue (Rare)',      color:T.blue,  rerolls:1 },
+  purple: { label:'Purple (Epic)',    color:T.purple, rerolls:2 },
+};
+const NODE_DEFS = [
+  { key:'top',    label:'Willpower Efficiency', hint:'always shown top, red',    tag:'TOP',    color:T.red },
+  { key:'bottom', label:'Points node',          hint:'Core/Chaos Points, orange',tag:'BOTTOM', color:T.yellow },
+  { key:'left',   label:'Side node (left)',     hint:'varies by gem type',       tag:'LEFT',   color:T.green },
+  { key:'right',  label:'Side node (right)',    hint:'varies by gem type',       tag:'RIGHT',  color:T.blue },
+];
+
+let state = {
+  grade: null,
+  priorities: { top:3, bottom:3, left:1, right:1 },
+  nodes: { top:{name:null,level:1}, bottom:{name:null,level:1}, left:{name:null,level:1}, right:{name:null,level:1} },
+  attempts: '',
+  attemptsTotal: '',
+  rerolls: 0,
+  stream: null,
+  watching: false,
+  busy: false,
+  lastFrameHash: null,
+  pollTimer: null,
+};
+
+// ---------- Setup phase build ----------
+const gradeRow = document.getElementById('gradeRow');
+Object.entries(GRADES).forEach(([key, g]) => {
+  const btn = document.createElement('button');
+  btn.className = 'gembtn';
+  btn.innerHTML = `<div class="dot" style="background:linear-gradient(135deg, ${g.color}, ${g.color}55)"></div>${key.toUpperCase()}<div style="font-family:'Inter',sans-serif;font-weight:400;font-size:10px;margin-top:4px;color:var(--dim);letter-spacing:0;">${g.rerolls} reroll${g.rerolls===1?'':'s'}</div>`;
+  btn.onclick = () => {
+    state.grade = key;
+    state.rerolls = g.rerolls;
+    [...gradeRow.children].forEach(c => { c.style.borderColor = 'var(--edge)'; c.style.background='transparent'; c.style.color='var(--dim)';});
+    btn.style.borderColor = g.color;
+    btn.style.background = g.color + '22';
+    btn.style.color = g.color;
+    document.getElementById('startBtn').disabled = false;
+  };
+  gradeRow.appendChild(btn);
+});
+
+const prioList = document.getElementById('prioList');
+NODE_DEFS.forEach(d => {
+  const row = document.createElement('div');
+  row.className = 'subrow';
+  const left = document.createElement('div');
+  left.innerHTML = `<span class="tag" style="color:${d.color}">${d.tag}</span><div class="name">${d.label}</div><div style="font-size:10px;color:var(--dim);">${d.hint}</div>`;
+  const right = document.createElement('div');
+  ['skip','low','med','max'].forEach((lbl, i) => {
+    const b = document.createElement('button');
+    b.className = 'weightbtn' + (state.priorities[d.key]===i ? ' active':'');
+    b.textContent = lbl;
+    b.onclick = () => {
+      state.priorities[d.key] = i;
+      [...right.children].forEach(c=>c.classList.remove('active'));
+      b.classList.add('active');
+    };
+    right.appendChild(b);
+  });
+  row.appendChild(left); row.appendChild(right);
+  prioList.appendChild(row);
+});
+
+document.getElementById('startBtn').onclick = () => {
+  document.getElementById('setupPhase').classList.add('hidden');
+  document.getElementById('playPhase').classList.remove('hidden');
+  const g = GRADES[state.grade];
+  document.getElementById('gemDot').style.background = `linear-gradient(135deg, ${g.color}, ${g.color}55)`;
+  document.getElementById('gemDot').style.transform = 'rotate(45deg)';
+  document.getElementById('gemDot').style.width = '26px';
+  document.getElementById('gemDot').style.height = '26px';
+  document.getElementById('gemDot').style.borderRadius = '6px';
+  document.getElementById('gemLabel').textContent = state.grade.toUpperCase() + ' GEM';
+  document.getElementById('gemLabel').style.color = g.color;
+  document.getElementById('rerollsOut').textContent = state.rerolls;
+  document.getElementById('rerollsIn').value = state.rerolls;
+  updateNodeSummary();
+  requestShare();
+};
+
+function updateNodeSummary() {
+  document.getElementById('nodeSummary').textContent = NODE_DEFS.map(d => {
+    const n = state.nodes[d.key];
+    return (n.name ? n.name.slice(0,3) : d.tag.slice(0,3)) + ' ' + n.level;
+  }).join(' · ');
+}
+
+// ---------- Screen share ----------
+const video = document.getElementById('preview');
+const cvs = document.getElementById('cvs');
+
+async function requestShare() {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 5 }, audio: false });
+    state.stream = stream;
+    video.srcObject = stream;
+    document.getElementById('watchDot').classList.add('live');
+    document.getElementById('watchLabel').textContent = 'Sharing — watching for taps';
+    document.getElementById('readBtn').disabled = false;
+    document.getElementById('shareBtn').textContent = 'STOP SHARING';
+    state.watching = true;
+    stream.getVideoTracks()[0].addEventListener('ended', stopShare);
+    if (document.getElementById('autoWatch').checked) startPolling();
+  } catch (e) {
+    showError("Screen share was cancelled or blocked. Click Share Screen and pick the Lost Ark window or your full screen.");
+  }
+}
+
+function stopShare() {
+  if (state.pollTimer) clearInterval(state.pollTimer);
+  if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+  state.watching = false;
+  document.getElementById('watchDot').classList.remove('live');
+  document.getElementById('watchLabel').textContent = 'Not sharing yet';
+  document.getElementById('readBtn').disabled = true;
+  document.getElementById('shareBtn').textContent = 'SHARE SCREEN';
+}
+
+document.getElementById('shareBtn').onclick = () => {
+  if (state.watching) stopShare(); else requestShare();
+};
+
+document.getElementById('autoWatch').onchange = (e) => {
+  if (e.target.checked && state.watching) startPolling();
+  else if (state.pollTimer) clearInterval(state.pollTimer);
+};
+
+// cheap perceptual hash: downsample to 16x16 grayscale, sum
+function grabFrame() {
+  if (!video.videoWidth) return null;
+  cvs.width = video.videoWidth;
+  cvs.height = video.videoHeight;
+  const ctx = cvs.getContext('2d');
+  ctx.drawImage(video, 0, 0, cvs.width, cvs.height);
+  return ctx;
+}
+
+function quickHash() {
+  const ctx = grabFrame();
+  if (!ctx) return null;
+  const small = document.createElement('canvas');
+  small.width = 16; small.height = 16;
+  const sctx = small.getContext('2d');
+  sctx.drawImage(cvs, 0, 0, 16, 16);
+  const data = sctx.getImageData(0, 0, 16, 16).data;
+  let sum = '';
+  for (let i = 0; i < data.length; i += 40) sum += data[i];
+  return sum;
+}
+
+function startPolling() {
+  if (state.pollTimer) clearInterval(state.pollTimer);
+  state.pollTimer = setInterval(() => {
+    if (state.busy || !state.watching) return;
+    const h = quickHash();
+    if (h === null) return;
+    if (state.lastFrameHash !== null && h !== state.lastFrameHash) {
+      // screen changed meaningfully -> likely a tap resolved
+      state.lastFrameHash = h;
+      // small debounce so animations settle before reading
+      setTimeout(() => { if (!state.busy) analyze(); }, 700);
+    } else {
+      state.lastFrameHash = h;
+    }
+  }, 1200);
+}
+
+// ---------- Analyze ----------
+document.getElementById('readBtn').onclick = () => analyze();
+
+async function analyze() {
+  if (state.busy) return;
+  const ctx = grabFrame();
+  if (!ctx) { showError("No video frame yet — make sure the shared window is visible."); return; }
+  state.busy = true;
+  hideResult();
+  hideError();
+  document.getElementById('readBtn').disabled = true;
+  document.getElementById('readBtn').textContent = 'READING…';
+
+  const b64 = cvs.toDataURL('image/jpeg', 0.85).split(',')[1];
+  const payload = {
+    gemGrade: state.grade,
+    priorities: Object.fromEntries(NODE_DEFS.map(d => [d.key, state.priorities[d.key]])),
+    priorityScale: '0=ignore, 1=nice-to-have, 2=important, 3=critical',
+    priorityLegend: 'top=Willpower Efficiency, bottom=Points node, left/right=side stat nodes',
+    trackedNodes: state.nodes,
+    trackedAttemptsLeft: state.attempts === '' ? null : Number(state.attempts),
+    trackedRerollsLeft: state.rerolls,
+  };
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image: b64,
+        mediaType: 'image/jpeg',
+        state: payload,
+      }),
+    });
+    const parsed = await res.json();
+    if (!res.ok || parsed.error) {
+      showError(parsed.error || 'The server returned an error.');
+    } else {
+      renderResult(parsed);
+    }
+  } catch (e) {
+    showError("Couldn't reach the server. Make sure the site is deployed with ANTHROPIC_API_KEY set, then try Read Now.");
+  }
+  state.busy = false;
+  document.getElementById('readBtn').disabled = !state.watching;
+  document.getElementById('readBtn').textContent = 'READ NOW';
+}
+
+function renderResult(parsed) {
+  const rd = parsed.read || {};
+  if (rd.attemptsLeft != null) { state.attempts = String(rd.attemptsLeft); document.getElementById('attemptsIn').value = state.attempts; document.getElementById('attemptsOut').textContent = state.attempts; }
+  if (rd.rerollsLeft != null) { state.rerolls = rd.rerollsLeft; document.getElementById('rerollsIn').value = state.rerolls; document.getElementById('rerollsOut').textContent = state.rerolls; }
+  if (rd.nodes) {
+    NODE_DEFS.forEach(d => {
+      const n = rd.nodes[d.key];
+      if (n) {
+        if (n.name) state.nodes[d.key].name = n.name;
+        if (n.level != null) state.nodes[d.key].level = n.level;
+      }
+    });
+    updateNodeSummary();
+  }
+
+  if (parsed.onScreen === false || parsed.decision === 'WAIT') {
+    document.getElementById('resultPanel').classList.remove('hidden');
+    document.getElementById('resultPanel').style.borderColor = 'var(--edge)';
+    document.getElementById('verdictText').textContent = "WAITING FOR THE GEM SCREEN";
+    document.getElementById('verdictText').style.color = 'var(--dim)';
+    document.getElementById('confText').textContent = '';
+    document.getElementById('lastResultBox').classList.add('hidden');
+    document.getElementById('reasoningText').textContent = parsed.reasoning || "I can't see the Astrogem processing screen right now — pull it up and hit Read Now.";
+    return;
+  }
+
+  const colorMap = { PROCESS: 'var(--green)', REROLL: 'var(--blue)', STOP: 'var(--red)' };
+  const labelMap = { PROCESS: 'PROCESS — TAKE THE ROLL', REROLL: 'REROLL THE PREVIEW', STOP: 'STOP — PROCESSING COMPLETE' };
+  const panel = document.getElementById('resultPanel');
+  panel.classList.remove('hidden');
+  panel.style.borderColor = colorMap[parsed.decision] || 'var(--edge)';
+  const verdict = document.getElementById('verdictText');
+  verdict.textContent = labelMap[parsed.decision] || parsed.decision;
+  verdict.style.color = colorMap[parsed.decision] || 'var(--ink)';
+  document.getElementById('confText').textContent = 'confidence: ' + (parsed.confidence || '—') + (parsed.progress ? ' · ' + parsed.progress : '');
+  if (rd.previewOutcomes && rd.previewOutcomes.length) {
+    document.getElementById('lastResultBox').classList.remove('hidden');
+    document.getElementById('lastResultBox').innerHTML = '<b>Previewed outcomes:</b><br>' +
+      rd.previewOutcomes.map(o => '• ' + o.desc).join('<br>');
+  } else {
+    document.getElementById('lastResultBox').classList.add('hidden');
+  }
+  document.getElementById('reasoningText').textContent = parsed.reasoning || '';
+}
+
+function hideResult() { document.getElementById('resultPanel').classList.add('hidden'); }
+function showError(msg) { const e = document.getElementById('errBox'); e.textContent = msg; e.classList.remove('hidden'); }
+function hideError() { document.getElementById('errBox').classList.add('hidden'); }
+
+document.getElementById('ackBtn').onclick = () => hideResult();
+
+document.getElementById('attemptsIn').oninput = (e) => {
+  state.attempts = e.target.value.replace(/\D/g, '');
+  e.target.value = state.attempts;
+  document.getElementById('attemptsOut').textContent = state.attempts || '?';
+};
+document.getElementById('rerollsIn').oninput = (e) => {
+  state.rerolls = Number(e.target.value.replace(/\D/g, '')) || 0;
+  e.target.value = state.rerolls;
+  document.getElementById('rerollsOut').textContent = state.rerolls;
+};
+
+document.getElementById('newGemBtn').onclick = () => {
+  stopShare();
+  state.nodes = { top:{name:null,level:1}, bottom:{name:null,level:1}, left:{name:null,level:1}, right:{name:null,level:1} };
+  state.attempts = '';
+  document.getElementById('attemptsIn').value = '';
+  document.getElementById('attemptsOut').textContent = '?';
+  hideResult();
+  hideError();
+  document.getElementById('playPhase').classList.add('hidden');
+  document.getElementById('setupPhase').classList.remove('hidden');
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "astrogem-cutter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live Astrogem processing advisor for Lost Ark. Share your screen; get told whether to Process, Reroll, or Stop."
+}
