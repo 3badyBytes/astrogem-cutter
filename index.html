@@ -142,7 +142,7 @@
       <div class="conf" id="confText"></div>
       <div class="lastresult hidden" id="lastResultBox"></div>
       <div class="reasoning" id="reasoningText"></div>
-      <button class="ghost" id="ackBtn" style="margin-top:14px;">GOT IT — KEEP WATCHING</button>
+      <button class="ghost" id="ackBtn" style="margin-top:14px;">I MADE MY MOVE — WATCH AGAIN</button>
     </div>
 
     <div class="panel">
@@ -182,6 +182,7 @@ let state = {
   rerolls: 0,
   stream: null,
   watching: false,
+  paused: false,
   busy: false,
   lastFrameHash: null,
   pollTimer: null,
@@ -318,17 +319,16 @@ function startPolling() {
   if (state.pollTimer) clearInterval(state.pollTimer);
   state.pollTimer = setInterval(() => {
     if (state.busy || !state.watching) return;
+    if (state.paused) return; // verdict shown — wait for the user to make their move
     const h = quickHash();
     if (h === null) return;
     if (state.lastFrameHash !== null && h !== state.lastFrameHash) {
-      // screen changed meaningfully -> likely a tap resolved
       state.lastFrameHash = h;
-      // small debounce so animations settle before reading
-      setTimeout(() => { if (!state.busy) analyze(); }, 700);
+      setTimeout(() => { if (!state.busy && !state.paused) analyze(); }, 400);
     } else {
       state.lastFrameHash = h;
     }
-  }, 1200);
+  }, 800);
 }
 
 // ---------- Analyze ----------
@@ -339,12 +339,22 @@ async function analyze() {
   const ctx = grabFrame();
   if (!ctx) { showError("No video frame yet — make sure the shared window is visible."); return; }
   state.busy = true;
+  state.paused = false;
   hideResult();
   hideError();
   document.getElementById('readBtn').disabled = true;
   document.getElementById('readBtn').textContent = 'READING…';
 
-  const b64 = cvs.toDataURL('image/jpeg', 0.85).split(',')[1];
+  // Downscale to max 1600px wide — big speed win, still sharp enough to read the UI
+  let sendCvs = cvs;
+  if (cvs.width > 1600) {
+    sendCvs = document.createElement('canvas');
+    const scale = 1600 / cvs.width;
+    sendCvs.width = 1600;
+    sendCvs.height = Math.round(cvs.height * scale);
+    sendCvs.getContext('2d').drawImage(cvs, 0, 0, sendCvs.width, sendCvs.height);
+  }
+  const b64 = sendCvs.toDataURL('image/jpeg', 0.8).split(',')[1];
   const payload = {
     gemGrade: state.grade,
     priorities: Object.fromEntries(NODE_DEFS.map(d => [d.key, state.priorities[d.key]])),
@@ -362,6 +372,7 @@ async function analyze() {
       body: JSON.stringify({
         image: b64,
         mediaType: 'image/jpeg',
+        mode: 'fast',
         state: payload,
       }),
     });
@@ -381,6 +392,8 @@ async function analyze() {
 
 function renderResult(parsed) {
   const rd = parsed.read || {};
+  const isVerdict = parsed.onScreen !== false && ['PROCESS','REROLL','STOP'].includes(parsed.decision);
+  state.paused = isVerdict; // hold on real verdicts until the user acts; keep watching on WAIT
   if (rd.attemptsLeft != null) { state.attempts = String(rd.attemptsLeft); document.getElementById('attemptsIn').value = state.attempts; document.getElementById('attemptsOut').textContent = state.attempts; }
   if (rd.rerollsLeft != null) { state.rerolls = rd.rerollsLeft; document.getElementById('rerollsIn').value = state.rerolls; document.getElementById('rerollsOut').textContent = state.rerolls; }
   if (rd.nodes) {
@@ -428,7 +441,11 @@ function hideResult() { document.getElementById('resultPanel').classList.add('hi
 function showError(msg) { const e = document.getElementById('errBox'); e.textContent = msg; e.classList.remove('hidden'); }
 function hideError() { document.getElementById('errBox').classList.add('hidden'); }
 
-document.getElementById('ackBtn').onclick = () => hideResult();
+document.getElementById('ackBtn').onclick = () => {
+  hideResult();
+  state.paused = false;
+  state.lastFrameHash = quickHash(); // baseline = current screen; next change = your move
+};
 
 document.getElementById('attemptsIn').oninput = (e) => {
   state.attempts = e.target.value.replace(/\D/g, '');

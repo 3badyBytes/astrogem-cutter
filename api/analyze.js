@@ -9,6 +9,14 @@ LAYOUT: The gem shows 4 stat nodes in a diamond arrangement, each with a current
 - LEFT and RIGHT (green/blue): two side stat nodes whose name varies by Astrogem type (e.g. "Atk. Power", "Additional Damage", "Boss Damage", "Ally Damage", etc). Priority depends on what the user says they want.
 
 THE RANDOM MECHANIC: Below the 4 nodes, a section reads "One of the following is randomly applied" and shows exactly 4 preview boxes. These are the POSSIBLE outcomes if the user clicks "Process" right now — assume roughly equal odds (~25% each) unless the UI shows otherwise. A preview outcome is usually one specific node jumping to a new level, but can also be a non-stat event like "Processing Cost +100%" (bad — doubles gold cost of future taps) or a bonus reroll.
+
+NODE VALUES (from community EV tables — use these as base per-level worth, multiplied by the user's priority weight):
+- Chaos/Order Points: 5.14 per level (most valuable)
+- Boss Damage: 2.55 per level
+- Willpower Efficiency: 2.4 per level
+- Additional Damage: 1.85 per level
+- Atk. Power: 1.0 per level (least valuable damage stat)
+So e.g. a preview "Chaos Points +1" is worth ~5.14 x priority, while "Atk. Power +2" is worth ~2.0 x priority. "Processing Cost +100%" is worth roughly negative one full tap of gold. Score each of the 4 previews this way, average them for the expected value of pressing Process, and compare against rerolling (free reshuffle, but consumes a scarce charge) or stopping (locks current state, zero further cost/risk).
 - A reroll counter (e.g. "1/1") shows how many times the user can reroll. Rerolling reshuffles the PREVIEWED 4 outcomes to a new random set — it happens BEFORE spending gold on Process, not after. It does not undo something already applied.
 - "Processing Cost" shows the gold cost of the next tap (rises over time, e.g. 900). "Process (X/Y)" shows attempts left out of the total.
 - "Processing Complete" locks in the gem's current levels permanently and ends the minigame. It is greyed out / unavailable until the user has processed at least once.
@@ -47,7 +55,7 @@ Respond ONLY with raw JSON, no markdown fences, no preamble:
   "decision": "PROCESS" | "REROLL" | "STOP" | "WAIT",
   "confidence": "high" | "medium" | "low",
   "progress": "short string or null",
-  "reasoning": "2-4 sentences, plain language, reference the actual previewed outcomes"
+  "reasoning": "1-2 short sentences max, plain language"
 }`;
 
 export default async function handler(req, res) {
@@ -63,11 +71,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { image, mediaType, state } = req.body || {};
+    const { image, mediaType, state, mode } = req.body || {};
     if (!image) {
       res.status(400).json({ error: "Missing image data" });
       return;
     }
+
+    // "fast" uses Haiku (several times quicker), "accurate" uses Sonnet
+    const model = mode === "accurate" ? "claude-sonnet-4-6" : "claude-haiku-4-5";
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -77,8 +88,8 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
+        model,
+        max_tokens: 700,
         system: SYSTEM_PROMPT,
         messages: [
           {
